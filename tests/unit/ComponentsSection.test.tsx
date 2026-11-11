@@ -79,12 +79,19 @@ async function openForm(user: ReturnType<typeof userEvent.setup>) {
   return screen.findByRole('dialog', { name: /agregar componente/i });
 }
 
+async function pickType(user: ReturnType<typeof userEvent.setup>, dialog: HTMLElement, name: string) {
+  const input = within(dialog).getByRole('combobox', { name: 'Tipo de componente *' });
+  await user.clear(input);
+  await user.type(input, name);
+  await user.click(within(dialog).getByRole('option', { name }));
+}
+
 async function fillForm(
   user: ReturnType<typeof userEvent.setup>,
   dialog: HTMLElement,
   v: { type: string; name: string; intervention: string; detail: string; note?: string },
 ) {
-  await user.selectOptions(within(dialog).getByLabelText('Tipo de componente *'), v.type);
+  await pickType(user, dialog, v.type);
   if (v.note !== undefined) await user.type(within(dialog).getByLabelText('Especificar tipo *'), v.note);
   await user.type(within(dialog).getByLabelText('Nombre (API Name) *'), v.name);
   await user.click(within(dialog).getByRole('radio', { name: v.intervention }));
@@ -105,7 +112,7 @@ describe('ComponentsSection', () => {
     const { unmount } = render(<ComponentsSection taskId="task-1" onChanged={onChanged} />);
     const dialog = await openForm(user);
     await fillForm(user, dialog, {
-      type: 'Lightning Web Component · LightningComponentBundle', name: 'PortalEmpresa', intervention: 'Nuevo', detail: DETAIL,
+      type: 'Lightning Web Component', name: 'PortalEmpresa', intervention: 'Nuevo', detail: DETAIL,
     });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
 
@@ -140,7 +147,7 @@ describe('ComponentsSection', () => {
     const user = userEvent.setup();
     render(<ComponentsSection taskId="task-1" />);
     const dialog = await openForm(user);
-    await fillForm(user, dialog, { type: 'Apex Class · ApexClass', name: 'Svc', intervention: 'Actualizado', detail: '<p></p>' });
+    await fillForm(user, dialog, { type: 'Apex Class', name: 'Svc', intervention: 'Actualizado', detail: '<p></p>' });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(await screen.findByText('Describe el trabajo realizado.')).toBeInTheDocument();
     expect(api.createTaskComponent).not.toHaveBeenCalled();
@@ -151,7 +158,7 @@ describe('ComponentsSection', () => {
     render(<ComponentsSection taskId="task-1" />);
     const dialog = await openForm(user);
     expect(within(dialog).queryByLabelText('Especificar tipo *')).not.toBeInTheDocument();
-    await user.selectOptions(within(dialog).getByLabelText('Tipo de componente *'), 'Otro');
+    await pickType(user, dialog, 'Otro');
     expect(within(dialog).getByLabelText('Especificar tipo *')).toBeInTheDocument();
     await user.type(within(dialog).getByLabelText('Nombre (API Name) *'), 'X');
     await user.click(within(dialog).getByRole('radio', { name: 'Configurado' }));
@@ -160,22 +167,25 @@ describe('ComponentsSection', () => {
     expect(await screen.findByText('Especifica el tipo de componente.')).toBeInTheDocument();
   });
 
-  it('el selector no ofrece tipos inactivos y permite buscar', async () => {
+  it('un solo campo de tipo: filtra por parte del nombre (LIKE) y no ofrece inactivos', async () => {
     const user = userEvent.setup();
     render(<ComponentsSection taskId="task-1" />);
     const dialog = await openForm(user);
-    const select = within(dialog).getByLabelText('Tipo de componente *');
-    expect(within(select).queryByText(/S-Control/)).not.toBeInTheDocument();
-    await user.type(within(dialog).getByLabelText('Buscar tipo de componente'), 'lightning');
-    const options = within(select).getAllByRole('option').map((o) => o.textContent);
-    expect(options).toEqual(['— Selecciona un tipo —', 'Lightning Web Component · LightningComponentBundle']);
+    expect(within(dialog).queryByLabelText(/buscar tipo/i)).not.toBeInTheDocument();
+    const input = within(dialog).getByRole('combobox', { name: 'Tipo de componente *' });
+    await user.type(input, 'web');
+    expect(within(dialog).getAllByRole('option').map((o) => o.textContent)).toEqual(['Lightning Web Component']);
+    await user.clear(input);
+    await user.type(input, 's-con');
+    expect(within(dialog).queryAllByRole('option')).toHaveLength(0);
+    expect(within(dialog).getByText(/sin coincidencias/i)).toBeInTheDocument();
   });
 
   it('recorta espacios del nombre antes de guardar', async () => {
     const user = userEvent.setup();
     render(<ComponentsSection taskId="task-1" />);
     const dialog = await openForm(user);
-    await fillForm(user, dialog, { type: 'Apex Class · ApexClass', name: '   AccountService   ', intervention: 'Nuevo', detail: 'x' });
+    await fillForm(user, dialog, { type: 'Apex Class', name: '   AccountService   ', intervention: 'Nuevo', detail: 'x' });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
     await waitFor(() => expect(api.createTaskComponent).toHaveBeenCalled());
     const values = vi.mocked(api.createTaskComponent).mock.calls[0][1];
@@ -188,7 +198,7 @@ describe('ComponentsSection', () => {
     render(<ComponentsSection taskId="task-1" />);
     const dialog = await openForm(user);
     await fillForm(user, dialog, {
-      type: 'Lightning Web Component · LightningComponentBundle', name: 'portalempresa', intervention: 'Nuevo', detail: 'x',
+      type: 'Lightning Web Component', name: 'portalempresa', intervention: 'Nuevo', detail: 'x',
     });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(await screen.findByText(/ya está registrado en la tarea/)).toBeInTheDocument();
@@ -202,7 +212,7 @@ describe('ComponentsSection', () => {
     // otro usuario lo registró mientras el formulario estaba abierto
     db.rows = [makeComponent()];
     await fillForm(user, dialog, {
-      type: 'Lightning Web Component · LightningComponentBundle', name: 'PortalEmpresa', intervention: 'Nuevo', detail: 'x',
+      type: 'Lightning Web Component', name: 'PortalEmpresa', intervention: 'Nuevo', detail: 'x',
     });
     await user.click(screen.getByRole('button', { name: 'Guardar' }));
     expect(await screen.findByText(/ya está registrado en la tarea/)).toBeInTheDocument();

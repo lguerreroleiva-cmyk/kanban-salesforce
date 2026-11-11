@@ -272,6 +272,11 @@ export type Database = {
     };
     Functions: {
       can_access_task: { Args: { p_task_id: string }; Returns: boolean };
+      component_type_usage: {
+        Args: Record<PropertyKey, never>;
+        Returns: { component_type_id: string; usage_count: number }[];
+      };
+      merge_component_types: { Args: { p_source: string; p_target: string }; Returns: number };
       html_is_unsafe: { Args: { p_html: string }; Returns: boolean };
       html_to_plain: { Args: { p_html: string }; Returns: string };
       is_app_admin: { Args: Record<PropertyKey, never>; Returns: boolean };

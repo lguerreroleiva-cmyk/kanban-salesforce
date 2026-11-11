@@ -65,9 +65,11 @@ export function TaskHistory({ taskId, refreshKey }: { taskId: string; refreshKey
   return (
     <section className="task-section" aria-labelledby="history-title">
       <header className="task-section__header">
-        <h3 id="history-title">Historial</h3>
+        <h3 id="history-title">
+          <span className="section-icon section-icon--orange" aria-hidden="true">🕘</span> Historial
+        </h3>
       </header>
-      {error && <p className="alert alert--error">{error}</p>}
+      {error && <p className="callout callout--error">{error}</p>}
       {entries.length === 0 ? (
         <p className="muted">Sin movimientos.</p>
       ) : (
@@ -75,7 +77,7 @@ export function TaskHistory({ taskId, refreshKey }: { taskId: string; refreshKey
           {entries.map((e) => {
             const diffs = describeChanges(e.changes);
             return (
-              <li key={e.id} className={`history__item history__item--${e.entity}`}>
+              <li key={e.id} className={`history__item history__item--${e.action}`}>
                 <div>
                   <strong>{profileName(profiles, e.actor_id)}</strong> {ACTION_LABELS[e.action] ?? e.action}{' '}
                   {e.entity === 'component' ? 'un componente' : 'la tarea'}

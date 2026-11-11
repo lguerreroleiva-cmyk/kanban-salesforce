@@ -3,12 +3,23 @@
 App Kanban (React + Vite + TypeScript + Supabase PostgreSQL) con registro estructurado de
 **componentes Salesforce desarrollados, actualizados o configurados** por tarea.
 
+Despliegue paso a paso en Supabase + Netlify: [DESPLIEGUE.md](DESPLIEGUE.md).
+
 Ver [RESUMEN_ENTREGA.md](RESUMEN_ENTREGA.md) para el análisis (Paso 0), plan, decisiones y supuestos.
 
 ## Requisitos
 
 - Node.js 20+ (probado con Node 26)
 - Supabase CLI + Docker (para el stack local y `gen types`)
+
+## Modo demo (sin Supabase)
+
+```bash
+npm install
+npm run demo                   # http://localhost:5180 con datos de ejemplo en memoria
+```
+
+Útil para revisar la interfaz. Los cambios se pierden al recargar y no se incluye en el build de producción.
 
 ## Puesta en marcha local
 

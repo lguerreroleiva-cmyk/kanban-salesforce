@@ -1,5 +1,22 @@
 # Resumen de entrega — Registro de componentes Salesforce por tarea
 
+## Versión 1.2 — Mejoras (2026-11-11)
+
+| # | Pedido | Qué se hizo |
+|---|---|---|
+| 1 | Interfaz más amigable y colores vivos | Barra lateral con íconos (menú deslizable en móvil), migas de pan, tableros con color propio, columnas con color por estado, tarjetas con contador 🧩 de componentes y fecha límite, intervenciones con color + ícono + texto (Nuevo verde, Actualizado azul, Configurado naranja), historial como línea de tiempo, login renovado. Modo claro y oscuro. |
+| 2 | Mantenedor de componentes (había nombres «duplicados») | La BD no tenía nombres duplicados (índice único); el selector mostraba «Nombre · MetadataType» (p. ej. «Flow · Flow», «Report · Report»), que parecía duplicado. Ahora el selector muestra solo el nombre. Nueva pantalla **Configuración → Tipos de componente**: crear, editar, activar/desactivar (interruptor), reordenar, eliminar (solo si no está en uso), **ver cuántos componentes usa cada tipo**, **aviso automático de posibles duplicados** y **fusionar** un tipo en otro (mueve los componentes de todas las tareas, deja historial y elimina el duplicado). |
+| 3 | Un solo campo para el tipo, con búsqueda tipo LIKE | El campo «Tipo de componente» es ahora un combobox único: al escribir parte del nombre filtra como `ILIKE '%texto%'` (sin mayúsculas ni tildes), resalta la coincidencia, prioriza las que empiezan con el texto y se maneja con ↑/↓/Enter/Esc. El filtrado se hace en el navegador porque el catálogo completo (~35 tipos) ya está cargado; equivale al LIKE y evita una consulta por tecla. |
+
+**Migración nueva:** `20261111000000_component_types_maintenance.sql` (funciones `component_type_usage()` y
+`merge_component_types()`, solo administradores). Reversión: `supabase/rollback/20261111000000_component_types_maintenance_down.sql`.
+
+**Pruebas:** 131/131 (BD 53, unitarias/UI 78). Nuevas: fusión y uso por tipo en BD (permisos, conflictos, historial),
+combobox (LIKE, teclado, restauración al salir), mantenedor (duplicados, crear, editar, activar, fusionar, eliminar).
+Revisión visual en el modo demo: escritorio y móvil, claro y oscuro.
+
+---
+
 ## ⚠️ Aviso principal
 
 La carpeta de destino estaba vacía y no se encontró en el equipo la app Kanban existente.

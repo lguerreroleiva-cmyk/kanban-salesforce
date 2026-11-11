@@ -13,10 +13,13 @@ interface TaskDetailPanelProps {
   onClose: () => void;
   onTaskChanged: (t: Task) => void;
   onTaskDeleted: (id: string) => void;
+  onComponentsChanged?: () => void;
 }
 
 /** Panel lateral (pantalla completa en móvil) con el detalle de la tarea. */
-export function TaskDetailPanel({ taskId, columns, onClose, onTaskChanged, onTaskDeleted }: TaskDetailPanelProps) {
+export function TaskDetailPanel({
+  taskId, columns, onClose, onTaskChanged, onTaskDeleted, onComponentsChanged,
+}: TaskDetailPanelProps) {
   const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
@@ -65,19 +68,18 @@ export function TaskDetailPanel({ taskId, columns, onClose, onTaskChanged, onTas
         onKeyDown={(e) => e.key === 'Escape' && onClose()}
       >
         <header className="panel__header">
-          <button type="button" className="icon-btn" aria-label="Cerrar detalle" onClick={onClose}>
-            ←
+          <button type="button" className="btn btn--sm" aria-label="Cerrar detalle" onClick={onClose}>
+            ← Volver al tablero
           </button>
-          <span className="muted">Detalle de la tarea</span>
           {task && (
             <button type="button" className="btn btn--sm btn--danger-ghost" onClick={() => setConfirmDelete(true)}>
-              Eliminar tarea
+              🗑️ Eliminar tarea
             </button>
           )}
         </header>
 
         {error && (
-          <div className="alert alert--error" role="alert">
+          <div className="callout callout--error" role="alert" style={{ margin: '1rem' }}>
             {error}
           </div>
         )}
@@ -86,6 +88,7 @@ export function TaskDetailPanel({ taskId, columns, onClose, onTaskChanged, onTas
           <p className="muted">Cargando…</p>
         ) : (
           <div className="panel__body">
+            <div className="panel__title">
             <label htmlFor="task-title" className="sr-only">
               Título
             </label>
@@ -113,10 +116,13 @@ export function TaskDetailPanel({ taskId, columns, onClose, onTaskChanged, onTas
                 ))}
               </select>
             </div>
+            </div>
 
             <section className="task-section" aria-labelledby="desc-title">
               <header className="task-section__header">
-                <h3 id="desc-title">Descripción</h3>
+                <h3 id="desc-title">
+                  <span className="section-icon section-icon--blue" aria-hidden="true">📝</span> Descripción
+                </h3>
                 {descriptionDirty && (
                   <button
                     type="button"
@@ -132,7 +138,13 @@ export function TaskDetailPanel({ taskId, columns, onClose, onTaskChanged, onTas
             </section>
 
             {/* Sección independiente: los componentes NO se guardan en la descripción. */}
-            <ComponentsSection taskId={task.id} onChanged={refreshHistory} />
+            <ComponentsSection
+              taskId={task.id}
+              onChanged={() => {
+                refreshHistory();
+                onComponentsChanged?.();
+              }}
+            />
 
             <TaskHistory taskId={task.id} refreshKey={historyKey} />
           </div>

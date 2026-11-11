@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "db:reset": "supabase db reset",
-    "gen:types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts"
+    "gen:types": "supabase gen types typescript --local --schema public > src/lib/database.types.ts",
+    "demo": "vite --mode demo --port 5180"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.45.4",

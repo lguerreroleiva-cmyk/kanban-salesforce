@@ -78,6 +78,23 @@ export async function deleteComponentType(id: string): Promise<void> {
   if (error) throw translateTypeError(error);
 }
 
+/** Cantidad de componentes registrados por tipo, en todas las tareas (solo admin). */
+export async function getComponentTypeUsage(): Promise<Map<string, number>> {
+  const { data, error } = await supabase.rpc('component_type_usage');
+  if (error) throw translateTypeError(error);
+  return new Map((data ?? []).map((r) => [r.component_type_id, Number(r.usage_count)]));
+}
+
+/** Mueve los componentes de `sourceId` a `targetId` y elimina `sourceId`. Devuelve cuántos movió. */
+export async function mergeComponentTypes(sourceId: string, targetId: string): Promise<number> {
+  const { data, error } = await supabase.rpc('merge_component_types', { p_source: sourceId, p_target: targetId });
+  if (error) {
+    // Los mensajes de la función ya están redactados para el usuario (conflictos, destino inactivo...).
+    throw error.hint === 'field:target' || error.code === '23505' ? new Error(error.message) : translateTypeError(error);
+  }
+  return data ?? 0;
+}
+
 export function translateTypeError(error: DbErrorLike): Error {
   if (error.code === '23505') return new Error('Ya existe un tipo con ese nombre.');
   if (error.code === '23503') {
@@ -113,6 +130,17 @@ export async function listComponentsForTasks(taskIds: string[]): Promise<TaskCom
     out.push(...(data as unknown as TaskComponent[]));
   }
   return out;
+}
+
+/** Cantidad de componentes por tarea (para las tarjetas del tablero). */
+export async function countComponentsByTask(taskIds: string[]): Promise<Map<string, number>> {
+  const counts = new Map<string, number>();
+  for (let i = 0; i < taskIds.length; i += 100) {
+    const { data, error } = await supabase.from('task_components').select('task_id').in('task_id', taskIds.slice(i, i + 100));
+    if (error) throw error;
+    for (const r of data) counts.set(r.task_id, (counts.get(r.task_id) ?? 0) + 1);
+  }
+  return counts;
 }
 
 export async function createTaskComponent(

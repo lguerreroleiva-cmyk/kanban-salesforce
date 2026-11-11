@@ -25,8 +25,8 @@ async function newTask(page: Page, title: string) {
 async function addPortalEmpresa(page: Page, intervention = 'Nuevo') {
   await page.getByRole('button', { name: /agregar componente/i }).first().click();
   const dialog = page.getByRole('dialog', { name: 'Agregar componente' });
-  await dialog.getByLabel('Buscar tipo de componente').fill('lightning web');
-  await dialog.getByLabel('Tipo de componente *').selectOption({ label: 'Lightning Web Component · LightningComponentBundle' });
+  await dialog.getByRole('combobox', { name: 'Tipo de componente *' }).fill('web comp');
+  await dialog.getByRole('option', { name: 'Lightning Web Component' }).click();
   await dialog.getByLabel('Nombre (API Name) *').fill('PortalEmpresa');
   await dialog.getByText(intervention, { exact: true }).click();
   await dialog.getByLabel('Detalle del trabajo realizado').click();
@@ -64,7 +64,8 @@ test('criterios 1, 2 y 3: registrar, editar con historial y buscar entre tareas'
   // Duplicado en la misma tarea
   await page.getByRole('button', { name: /agregar componente/i }).first().click();
   const dup = page.getByRole('dialog', { name: 'Agregar componente' });
-  await dup.getByLabel('Tipo de componente *').selectOption({ label: 'Lightning Web Component · LightningComponentBundle' });
+  await dup.getByRole('combobox', { name: 'Tipo de componente *' }).fill('lightning web');
+  await dup.getByRole('option', { name: 'Lightning Web Component' }).click();
   await dup.getByLabel('Nombre (API Name) *').fill('portalempresa');
   await dup.getByText('Nuevo', { exact: true }).click();
   await dup.getByLabel('Detalle del trabajo realizado').click();

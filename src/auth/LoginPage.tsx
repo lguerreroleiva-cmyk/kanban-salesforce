@@ -22,23 +22,33 @@ export function LoginPage() {
     const { error: err } =
       mode === 'signin'
         ? await supabase.auth.signInWithPassword({ email, password })
-        : await supabase.auth.signUp({ email, password });
+        : await supabase.auth.signUp({ email, password, options: { emailRedirectTo: window.location.origin } });
     setBusy(false);
-    if (err) setError(err.message);
-    else if (mode === 'signup') setInfo('Cuenta creada. Revisa tu correo si se requiere confirmación.');
+    if (err) setError(err.message === 'Invalid login credentials' ? 'Correo o contraseña incorrectos.' : err.message);
+    else if (mode === 'signup') setInfo('Cuenta creada. Revisa tu correo para confirmarla y luego inicia sesión.');
   };
 
   return (
-    <main className="page page--narrow">
-      <h1>Kanban · Salesforce</h1>
-      <form className="form card" onSubmit={submit}>
-        <h2 className="h3">{mode === 'signin' ? 'Iniciar sesión' : 'Crear cuenta'}</h2>
+    <main className="login">
+      <form className="login__card form" onSubmit={submit}>
+        <div className="login__brand">
+          <span className="brand__logo" aria-hidden="true">
+            ☁️
+          </span>
+          <div>
+            <h1>Kanban SF</h1>
+            <p className="muted" style={{ margin: 0 }}>
+              Tareas y componentes Salesforce
+            </p>
+          </div>
+        </div>
+        <h2>{mode === 'signin' ? 'Inicia sesión' : 'Crea tu cuenta'}</h2>
         {error && (
-          <div className="alert alert--error" role="alert">
+          <div className="callout callout--error" role="alert">
             {error}
           </div>
         )}
-        {info && <div className="alert">{info}</div>}
+        {info && <div className="callout callout--ok">{info}</div>}
         <div className="field">
           <label htmlFor="email">Correo</label>
           <input id="email" type="email" className="input" required value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
@@ -60,7 +70,7 @@ export function LoginPage() {
           {busy ? 'Procesando…' : mode === 'signin' ? 'Entrar' : 'Registrarme'}
         </button>
         <button type="button" className="link" onClick={() => setMode(mode === 'signin' ? 'signup' : 'signin')}>
-          {mode === 'signin' ? '¿No tienes cuenta? Regístrate' : 'Ya tengo cuenta'}
+          {mode === 'signin' ? '¿No tienes cuenta? Regístrate' : 'Ya tengo cuenta, iniciar sesión'}
         </button>
       </form>
     </main>

@@ -99,7 +99,7 @@ export function ComponentFormModal({ types, existing, editing, onSubmit, onClose
       >
         <form id="component-form" className="form" onSubmit={submit} noValidate>
           {formError && (
-            <div className="alert alert--error" role="alert">
+            <div className="callout callout--error" role="alert">
               {formError}
             </div>
           )}

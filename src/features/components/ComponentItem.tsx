@@ -17,7 +17,7 @@ export function ComponentItem({ component: c, onEdit, onDelete }: ComponentItemP
   const detailId = useId();
 
   return (
-    <li className="component-item" data-testid="component-item">
+    <li className={`component-item component-item--${c.intervention_type}`} data-testid="component-item">
       <div className="component-item__head">
         <button
           type="button"

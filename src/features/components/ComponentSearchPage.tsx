@@ -45,8 +45,16 @@ export function ComponentSearchPage() {
 
   return (
     <main className="page">
-      <h1>Buscar componente entre tareas</h1>
-      <form className="search-bar" onSubmit={submit} role="search">
+      <header className="page-header">
+        <div>
+          <p className="eyebrow">Trazabilidad</p>
+          <h1>Buscar componente</h1>
+          <p className="muted">Escribe parte del nombre (API Name) y verás todas las tareas donde fue intervenido.</p>
+        </div>
+      </header>
+      <form className="search-hero" onSubmit={submit} role="search">
+        <div className="search-input">
+        <span aria-hidden="true">🔍</span>
         <label htmlFor="component-search" className="sr-only">
           Nombre del componente
         </label>
@@ -58,13 +66,14 @@ export function ComponentSearchPage() {
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
+        </div>
         <button type="submit" className="btn btn--primary" disabled={loading}>
           {loading ? 'Buscando…' : 'Buscar'}
         </button>
       </form>
 
       {error && (
-        <div className="alert alert--error" role="alert">
+        <div className="callout callout--error" role="alert">
           {error}
         </div>
       )}
@@ -78,7 +87,7 @@ export function ComponentSearchPage() {
       )}
 
       {results && results.length > 0 && (
-        <div className="table-wrap">
+        <div className="table-wrap card card--flush">
           <table className="table table--stack">
             <thead>
               <tr>
@@ -99,7 +108,7 @@ export function ComponentSearchPage() {
                   </td>
                   <td data-label="Tipo">{r.component_type_name}</td>
                   <td data-label="Tarea">
-                    <Link to={`/boards/${r.board_id}?task=${r.task_id}`}>{r.task_title}</Link>
+                    <Link to={`/boards/${r.board_id}?task=${r.task_id}`}><strong>{r.task_title}</strong></Link>
                   </td>
                   <td data-label="Tablero">{r.board_name}</td>
                   <td data-label="Intervención">

@@ -85,6 +85,7 @@ export function ComponentsSection({ taskId, onChanged }: ComponentsSectionProps)
     <section className="task-section components-section" aria-labelledby="components-title">
       <header className="task-section__header">
         <h3 id="components-title">
+          <span className="section-icon section-icon--violet" aria-hidden="true">🧩</span>
           {SECTION_TITLE}{' '}
           <span className="counter" data-testid="components-counter" aria-label={`${components.length} componentes`}>
             {components.length}
@@ -102,7 +103,7 @@ export function ComponentsSection({ taskId, onChanged }: ComponentsSectionProps)
       </p>
 
       {error && (
-        <div className="alert alert--error" role="alert">
+        <div className="callout callout--error" role="alert">
           {error}{' '}
           <button type="button" className="link" onClick={() => void load()}>
             Reintentar
@@ -114,6 +115,7 @@ export function ComponentsSection({ taskId, onChanged }: ComponentsSectionProps)
         <p className="muted">Cargando componentes…</p>
       ) : components.length === 0 ? (
         <div className="empty-state">
+          <span className="empty-state__icon" aria-hidden="true">🧩</span>
           <p>Aún no se han registrado componentes Salesforce en esta tarea.</p>
           <button type="button" className="btn btn--primary" onClick={openCreate}>
             Agregar componente
